@@ -14,17 +14,27 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final todoList = ToDo.todoList();
+  List<ToDo> _foundToDo = [];
+  final _todoController = TextEditingController();
+
+  @override
+  void initState() {
+    _foundToDo = todoList;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: tdBGColor,
+      // appBar: _buildAppBar(),
+      drawer: MyDrawer(),
       appBar: _buildAppBar(),
       body: Stack(
         children: [
           Container(
             padding: EdgeInsets.symmetric(
-              horizontal: 20,
+              horizontal: 15,
               vertical: 15,
             ),
             child: Column(children: [
@@ -38,71 +48,78 @@ class _HomeState extends State<Home> {
                         bottom: 20,
                       ),
                       child: Text(
-                        'All ToDos',
+                        'My TO DO list',
                         style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
-                    for (ToDo todoo in todoList)
+                    for (ToDo todoo in _foundToDo.reversed)
                       ToDoItem(
                         todo: todoo,
+                        onToDoChanged: _handleToDoChange,
+                        onDeleteItem: _deleteToDoItem,
                       ),
                   ],
                 ),
-              )
-            ]),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    margin: EdgeInsets.only(bottom: 20, right: 20, left: 20),
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.grey,
-                          offset: Offset(0.0, 0.0),
-                          blurRadius: 10.0,
-                          spreadRadius: 0.0,
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        margin: EdgeInsets.only(bottom: 20, right: 20, left: 5),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.grey,
+                              offset: Offset(0.0, 0.0),
+                              blurRadius: 10.0,
+                              spreadRadius: 0.0,
+                            ),
+                          ],
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                      ],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Add new to do item',
-                        border: InputBorder.none,
+                        child: TextField(
+                          controller: _todoController,
+                          decoration: InputDecoration(
+                            hintText: 'Add new to do item',
+                            border: InputBorder.none,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    Container(
+                      margin: EdgeInsets.only(
+                        bottom: 20,
+                        right: 5,
+                        // left: 5,
+                      ),
+                      child: ElevatedButton(
+                        child: Text(
+                          '+',
+                          style: TextStyle(
+                            fontSize: 40,
+                          ),
+                        ),
+                        onPressed: () {
+                          _addToDoItem(_todoController.text);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: Size(60, 60),
+                          elevation: 10,
+                        ),
+                      ),
+                    )
+                  ],
                 ),
-                Container(
-                  margin: EdgeInsets.only(
-                    bottom: 20,
-                    right: 20,
-                  ),
-                  child: ElevatedButton(
-                    child: Text(
-                      '+',
-                      style: TextStyle(
-                        fontSize: 40,
-                      ),
-                    ),
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: Size(60, 60),
-                      elevation: 10,
-                    ),
-                  ),
-                )
-              ],
-            ),
+              ),
+            ]),
           ),
         ],
       ),
@@ -110,8 +127,42 @@ class _HomeState extends State<Home> {
   }
 
   void _handleToDoChange(ToDo todo) {
+    //setState()  >>Notify the framework that the internal state of this object has changed.
     setState(() {
       todo.isDone = !todo.isDone;
+    });
+  }
+
+  void _deleteToDoItem(String id) {
+    //setState()  >>Notify the framework that the internal state of this object has changed.
+    setState(() {
+      todoList.removeWhere((item) => item.id == id);
+    });
+  }
+
+  void _addToDoItem(String toDo) {
+    setState(() {
+      todoList.add(ToDo(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        todoText: toDo,
+      ));
+    });
+    _todoController.clear();
+  }
+
+  void _runFilter(String enteredKeyword) {
+    List<ToDo> results = [];
+    if (enteredKeyword.isEmpty) {
+      results = todoList;
+    } else {
+      results = todoList
+          .where((item) => item.todoText
+              .toLowerCase()
+              .contains(enteredKeyword.toLowerCase()))
+          .toList();
+    }
+    setState(() {
+      _foundToDo = results;
     });
   }
 
@@ -119,9 +170,16 @@ class _HomeState extends State<Home> {
   Widget searchBox() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 15),
-      decoration: BoxDecoration(
-          color: Colors.white, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(boxShadow: const [
+        BoxShadow(
+          color: Colors.grey,
+          offset: Offset(0.0, 0.0),
+          blurRadius: 10.0,
+          spreadRadius: 0.0,
+        ),
+      ], color: Colors.white, borderRadius: BorderRadius.circular(20)),
       child: TextField(
+        onChanged: (value) => _runFilter(value),
         decoration: InputDecoration(
           contentPadding: EdgeInsets.all(0),
           prefixIcon: Icon(
@@ -145,20 +203,46 @@ class _HomeState extends State<Home> {
       //The elevation controls the shadow effect displayed below the AppBar.
       elevation: 0,
       title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Icon(
-          Icons.menu,
-          color: tdBlack,
-          size: 30,
-        ),
+        // Icon(
+        //   Icons.menu,
+        //   color: tdBlack,
+        //   size: 30,
+        // ),
+        // Drawer(),
         Container(
           height: 40,
           width: 40,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Image.asset('assets/images/avatar.jpeg'),
-          ),
+          // child: ClipRRect(
+          //   borderRadius: BorderRadius.circular(20),
+          //   child: Image.asset('assets/images/avatar.jpeg'),
+          // ),
         )
       ]),
+    );
+  }
+}
+
+class MyDrawer extends StatelessWidget {
+  const MyDrawer({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+                gradient:
+                    LinearGradient(colors: [Colors.white, Colors.indigo])),
+            child: Center(
+              child: CircleAvatar(
+                backgroundImage: AssetImage("assets/images/avatar.jpeg"),
+                radius: 80,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
