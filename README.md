@@ -1,16 +1,33 @@
-# to_do_list
+# To do list : Flutter (mobile) Application
 
-A new Flutter project.
+**----Description----** 
 
-## Getting Started
+A simple to do list application, that allows its users to add a new task, mark it as finished, delete it and filter the list with a specific input word.
 
-This project is a starting point for a Flutter application.
+**----What you need to run this project----**
 
-A few resources to get you started if this is your first Flutter project:
+This app is developed using: 
+***Flutter SDK***
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+***VCStudio***: IDE, code editor with support for development operations like debugging, task running, and version control.  You can also use ***Android Studio*** or ***IntelliJ IDEA***
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+***Flutter*** extension: Flutter support and debugger for Visual Studio Code.
+
+***Dart*** extension: Dart language support and debugger for Visual Studio Code.
+
+***emulator***: I used my phone as one (Physical Device) but you can also use a virtual device.
+
+For more info, you can install Flutter by following the steps in the official ***Flutter documentation***:
+>  https://docs.flutter.dev/get-started/install
+
+
+**----To run the application----**
+
+>    Check your development setup
+
+    flutter doctor
+    
+>    Run your application
+
+    flutter run
+
